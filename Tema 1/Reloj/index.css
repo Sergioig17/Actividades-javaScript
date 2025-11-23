@@ -1,0 +1,34 @@
+
+body {
+    font-family: "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #000000, #00b7ff);
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 68.5%;
+}
+
+#tiempo {
+    background: rgb(255, 255, 255);
+    padding: 30px 40px;
+    border-radius: 18px;
+    box-shadow: -10px -10px 20px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    min-width: 250px;
+}
+
+#tiempo h1 {
+    font-size: 8rem;
+    margin: 0 0 15px 0;
+    letter-spacing: 1px;
+    color: #140083;
+}
+
+#reloj {
+    font-size: 8em;
+    font-weight: bold;
+    color: #1a1a1a;
+    margin: 0;
+}
