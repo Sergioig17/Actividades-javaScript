@@ -13,6 +13,10 @@ let moverbarra;
 let pararbarra;
 let vidas=3; 
 let siguientenivel=false;
+let intervalopelota;
+let breinicio;
+let bextra;
+let abierto=false;
 window.onload=()=>{
     comienzo();
 };
@@ -21,6 +25,17 @@ function comienzo(){
     velocidadY=-2;
     velocidadX=3;
     if(primeraejecucion){
+        vidas=3;
+        let vidasul=document.getElementById("vidas");
+        for(let i=1;i<=vidas;i++){
+            let li=document.createElement("li");
+            li.innerHTML="<img src=\"recursos/imagenes/Corazon-Lleno.png\" alt=\"vida-llena\">"
+            vidasul.appendChild(li);
+        }
+        breinicio=document.getElementById("breinicio");
+        bextra=document.getElementById("bextra");
+        breinicio.addEventListener("click",reinicio); 
+        bextra.addEventListener("click",nivelesEx);
         marco=document.getElementById("marco")
         miBarra=document.createElement("div");
         miBarra.id="barra";
@@ -53,7 +68,7 @@ function comienzo(){
 
     moverbarra=(e)=>{
         if(primera){
-            if(e.key=="ArrowLeft")
+            if(e.key=="ArrowLeft" && velocidadX>0)
                 velocidadX*=-1;
             if(e.key=="ArrowLeft"||e.key=="ArrowRight"){
                 animajuego();
@@ -101,27 +116,27 @@ function comienzo(){
 function creacionMapa(dificultad){
     let insertar=document.getElementById("niveles")
     let bloques_nivel=[]
-     let heart = [
-[0,0,1,1,0,0,1,1,0,0],
-[0,0,1,1,0,0,1,1,0,0],
-[0,1,1,1,1,1,1,1,1,0],
-[0,1,1,1,1,1,1,1,1,0],
-[1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1],
-[1,1,1,1,1,1,1,1,1,1],
-[0,1,1,1,1,1,1,1,1,0],
-[0,1,1,1,1,1,1,1,1,0],
-[0,0,1,1,1,1,1,1,0,0],
-[0,0,1,1,1,1,1,1,0,0],
-[0,0,0,1,1,1,1,0,0,0],
-[0,0,0,1,1,1,1,0,0,0],
-[0,0,0,0,1,1,0,0,0,0],
-]
+    let heart = [
+        [0,0,1,1,0,0,1,1,0,0],
+        [0,0,1,1,0,0,1,1,0,0],
+        [0,1,1,1,1,1,1,1,1,0],
+        [0,1,1,1,1,1,1,1,1,0],
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1,1,1],
+        [0,1,1,1,1,1,1,1,1,0],
+        [0,1,1,1,1,1,1,1,1,0],
+        [0,0,1,1,1,1,1,1,0,0],
+        [0,0,1,1,1,1,1,1,0,0],
+        [0,0,0,1,1,1,1,0,0,0],
+        [0,0,0,1,1,1,1,0,0,0],
+        [0,0,0,0,1,1,0,0,0,0],
+        ];
 
-let extra=true;
+let extra=dificultad<0;
     if(extra==true){
         for(let i=0;i<heart.length;i++){
             let nivel=document.createElement("div");
@@ -164,7 +179,7 @@ let extra=true;
     }
     
 }
-let intervalopelota;
+
 function animajuego(){
     intervalopelota=setInterval(()=>{
         posY+=velocidadY;
@@ -234,11 +249,12 @@ function choquebarra(bola,opcion){
     if (bola.bottom+Math.abs(velocidadY) > barra.top && bola.top-Math.abs(velocidadY) < barra.bottom 
     && bola.right+Math.abs(velocidadX )> barra.left && bola.left-Math.abs(velocidadX) < barra.right) { 
         let vertical = Math.abs(bola.bottom - barra.top);
+        let abajo= Math.abs(bola.y-barra.bottom);
         let horizontalizq = Math.abs(bola.right - barra.left);
         let horizontalder = Math.abs(bola.left - barra.right);
         tocar=true;
         if(opcion==null){
-            if (Math.min(vertical, horizontalder, horizontalizq)==vertical &&velocidadY>0) {
+            if (Math.min(vertical, horizontalder, horizontalizq,abajo)==vertical &&velocidadY>0) {
                 velocidadY *= -1;
             } else {
                 velocidadX *= -1;
@@ -269,6 +285,7 @@ function choquemarco(bola){
 function final(resultado){
     clearInterval(intervalo);
     clearInterval(intervalopelota);
+
     if(resultado){
         dificultad++;
         document.removeEventListener("keydown",moverbarra);
@@ -280,13 +297,14 @@ function final(resultado){
     else{
         let corazones=document.getElementById("vidas");
         vidas--;
+        corazones.children[vidas].children[0].src="recursos/imagenes/Corazon-Vacio.png";
         document.removeEventListener("keydown",moverbarra);
         document.removeEventListener("keyup",pararbarra);
         if(vidas>0){
-            corazones.children[vidas].children[0].src="recursos/imagenes/Corazon-Vacio.png";
             comienzo();    
         }
         else{
+            abierto=true;
             let perder=document.createElement("div");
             perder.id="lose"
             perder.innerHTML="<img src=recursos/imagenes/you-died.gif></img>";
@@ -294,21 +312,32 @@ function final(resultado){
             marco.appendChild(perder);
             setTimeout(()=>{
                 let reiniciobot=document.createElement("button");
-                reiniciobot.innerHTML="¿Reiniciar?";
+                reiniciobot.id="breinicio";
                 perder.innerHTML="<h2>Has perdido</h2>";
                 perder.appendChild(reiniciobot);
-                reiniciobot.addEventListener("click",reinicio);
+                reiniciobot.addEventListener("click",()=>reinicio(1));
                 perder.style.backgroundColor="red";
-                perder.style.opacity="70%";
                 
             },2000);
         }
     }
 }
 
-function reinicio(){
-    let perder=document.getElementById("lose")
-    marco.removeChild(perder);
+function reinicio(opcion){
+    if(opcion==1||abierto){
+        abierto=false
+        let perder=document.getElementById("lose")
+        marco.removeChild(perder);
+    }
+    if(opcion==2){
+        dificultad=-1;
+    }
+    else{
+        dificultad=1;
+    }
+    let vidasul=document.getElementById("vidas");
+    vidasul.innerHTML="";
+    bloques=[];
     let niveles=document.getElementById("niveles");
     let vecesborrar=niveles.childElementCount;
     for(let i=0;i<vecesborrar;i++){
@@ -327,9 +356,7 @@ function reinicio(){
     comienzo();
 }
 
-function nivelesex(){    
-    dificultad=4;
-    clearInterval(intervalo);
-    clearInterval(intervalopelota);
-    comienzo();
+
+function nivelesEx(){    
+    reinicio(2);
 }

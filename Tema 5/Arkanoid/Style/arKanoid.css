@@ -27,7 +27,6 @@
     }
 
     #marco{
-        margin-top: 20px;
         box-shadow: 0px 0px 0px 10px white;
         background: url("../recursos/imagenes/fondoestrellas.png");
         align-self: center;
@@ -59,10 +58,15 @@
     }
 
     #lose{
-        width: max-content;
+        position: fixed;
+        display: flex;
+        height: 40vh;
+        width: 40vw;
         justify-self: center;
-        justify-self: center;
-        
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 15vh;
     }
     #lose >img{
         width: 100%;
@@ -71,3 +75,47 @@
         width: 60%;
         height: 20%;
     }
+
+    #breinicio {     
+        background: url(../recursos/imagenes/Boton-Reinicio.png) no-repeat center center;
+        background-size: 100% 100%; 
+        border: none; 
+        width: inherit; 
+        height: inherit; 
+        cursor: pointer; 
+    }
+
+    #breinicio:active {     
+        background: url(../recursos/imagenes/Boton-Reinicio-Hover.png) no-repeat center center;
+        background-size: 100% 100%;
+        width: inherit; 
+        height: inherit;
+    }
+    #bextra {     
+        background: url(../recursos/imagenes/Boton-Extra.png) no-repeat center center;
+        background-size: 100% 100%; 
+        border: none; 
+        width: inherit; 
+        height: inherit; 
+        cursor: pointer; 
+    }
+    #bextra:active {     
+        background: url(../recursos/imagenes/Boton-Extra-Hover.png) no-repeat center center;
+        background-size: 100% 100%;
+        border: none;
+        width: inherit;
+        height: inherit;
+    }
+
+
+    #botones{
+        margin-right: 5vw;
+        height: 10vh;
+        width: 12vw;
+        display: grid;
+        grid-gap:1vw ;
+        align-self: anchor-center;
+        position: fixed;
+        justify-self: right;
+    }
+    
