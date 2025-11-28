@@ -1,41 +1,47 @@
-let miBola;
-var miBarra;
-var marco;
-let bloques=[];
-let posX;
-let posY;
-let velocidadX;
-let velocidadY;
-let primeraejecucion=true;
-let intervalo;
-let dificultad=1;
-let moverbarra;
-let pararbarra;
-let vidas=3; 
-let siguientenivel=false;
-let intervalopelota;
-let breinicio;
-let bextra;
-let abierto=false;
+let miBola; //La bola del juego
+var miBarra; //Barra del juego
+var marco; //Mapa o marco del juego
+let intervalopelota; //Movimiento de la bola 
+let intervalo; //Movimiento de la barra
+let bloques=[]; //array de todos los bloques en la pantalla para la busqueda de su golpeo
+let posX; //Posicion que cambia de la bola en X
+let posY; //Posicion que cambia de la bola en Y
+let velocidadX; //Velocidad x de la bola
+let velocidadY; //velocidad Y de la bola
+let primeraejecucion=true; //dice si es la primera vez del juego en ejecutarse
+let dificultad=1;//Dificultad inicial es decir cuantas filas de bloques son creadas
+let moverbarra; //variable del movimiento de la barra
+let pararbarra;//nombre variable que detiene la barra
+let vidasinic=3;// Vidas iniciales aumentarlas si es necesario no deberia causar fallos
+let vidas; //Vidas a lo largo del juego usadas para cambiar las imagenes vidas
+let siguientenivel=false; //Avisa si se debe pasar de nivel
+let abierto=false; //Abierto es para el final del juego al perder permitir la aparicion del menu y evitar errores con el boton reinicio
+//Todo ocurre una vez la ventana es cargada
 window.onload=()=>{
     comienzo();
 };
 
-function comienzo(){
+
+function comienzo(){ //Empieza el juego Crea los botones de extra y reinicio la bola  las vidas las cuales son posicionadas con css, la bola y la barra
+    let bextra;
+    let breinicio;
     velocidadY=-2;
     velocidadX=3;
     if(primeraejecucion){
-        vidas=3;
-        let vidasul=document.getElementById("vidas");
+        vidas=vidasinic;
+        let vidasul=document.getElementById("vidas"); 
+        //Creo las vidas
         for(let i=1;i<=vidas;i++){
             let li=document.createElement("li");
             li.innerHTML="<img src=\"recursos/imagenes/Corazon-Lleno.png\" alt=\"vida-llena\">"
             vidasul.appendChild(li);
         }
+        //Creacion de los botones inicio y extra ademas de añadir su funcion
         breinicio=document.getElementById("breinicio");
         bextra=document.getElementById("bextra");
         breinicio.addEventListener("click",reinicio); 
         bextra.addEventListener("click",nivelesEx);
+        //Creo barra y bola
         marco=document.getElementById("marco")
         miBarra=document.createElement("div");
         miBarra.id="barra";
@@ -44,42 +50,50 @@ function comienzo(){
         miBola.id="bola";
         miBarra.after(miBola);
         primeraejecucion=false;
+        //Creo el primer nivel
        creacionMapa(dificultad);
     }
+    //Posiciono la barra y la bola
+    let posicionXbarra=marco.getBoundingClientRect().width*0.5-miBarra.getBoundingClientRect().width/2;
+    miBarra.style.marginLeft=posicionXbarra+"px";
+    miBarra.style.marginTop=marco.getBoundingClientRect().bottom-(marco.getBoundingClientRect().height*0.2)+"px" 
+    posY=(miBarra.getBoundingClientRect().y-marco.getBoundingClientRect().y-miBarra.getBoundingClientRect().height);
+    posX=((miBarra.getBoundingClientRect().right)-marco.getBoundingClientRect().x-(miBarra.getBoundingClientRect().width/2));
+
+    //Evita que la bola este en el sitio donde ha pasado de nivel al siguiente para que no destruya un bloque por error(Increiblemente lo soluciona)
+    do{
+        miBola.style.marginTop=posY+"px";
+        miBola.style.marginLeft=posX+"px";
+    }while(miBola.style.marginTop!=(posY+"px")) 
+    
+    //Creo el mapa si paso de nivel
     if(siguientenivel==true){
         creacionMapa(dificultad);
         siguientenivel=false;
     }
-    let posicionXbarra=marco.getBoundingClientRect().width*0.5-miBarra.getBoundingClientRect().width/2;
-    miBarra.style.marginLeft=posicionXbarra+"px";
-    miBarra.style.marginTop=marco.getBoundingClientRect().bottom-(marco.getBoundingClientRect().height*0.2)+"px"
 
-    posY=(miBarra.getBoundingClientRect().y-marco.getBoundingClientRect().y-miBarra.getBoundingClientRect().height);
-    posX=((miBarra.getBoundingClientRect().right)-marco.getBoundingClientRect().x-(miBarra.getBoundingClientRect().width/2));
-    miBola.style.marginTop=posY+"px";
-    miBola.style.marginLeft=posX+"px";
-
-
+    //variables para el movimiento de la barra
     let primera=true;
     let movimiento=false;
-    let ultima;
-
+    let ultima;//Ultima flecha usada
     let velocidadbarra=4;
 
     moverbarra=(e)=>{
         if(primera){
             if(e.key=="ArrowLeft" && velocidadX>0)
                 velocidadX*=-1;
+
             if(e.key=="ArrowLeft"||e.key=="ArrowRight"){
                 animajuego();
-            primera=false;
+                primera=false;
             }
         }
         if(!movimiento){
             if(e.key=="ArrowRight"&&miBarra.getBoundingClientRect().right<marco.getBoundingClientRect().right){
                 ultima=e.key;
                 intervalo=setInterval(()=>{
-                    if(miBarra.getBoundingClientRect().right<marco.getBoundingClientRect().right &&((!choquebarra(miBola.getBoundingClientRect(),2)))){
+                    //Compruebo que no toque a la bola para evitar colisiones extrañas si lo hace se detiene y no se
+                    if(miBarra.getBoundingClientRect().right<marco.getBoundingClientRect().right &&!choquebarra(miBola.getBoundingClientRect(),2)){
                         posicionXbarra +=velocidadbarra;
                         miBarra.style.marginLeft=posicionXbarra+"px";
                         movimiento=true;
@@ -87,7 +101,7 @@ function comienzo(){
                 },1);
             }
             else{
-                if(e.key=="ArrowLeft"&& miBarra.getBoundingClientRect().x>marco.getBoundingClientRect().x){
+                if(e.key=="ArrowLeft"&& miBarra.getBoundingClientRect().x>marco.getBoundingClientRect().x && !choquebarra(miBola.getBoundingClientRect(),2)){
                     ultima=e.key;
                     intervalo=setInterval(()=>{
                         if(miBarra.getBoundingClientRect().x>marco.getBoundingClientRect().x){
@@ -100,6 +114,7 @@ function comienzo(){
             }
         }
     };
+
     pararbarra=(c)=>{   
         if(ultima==c.key){
             clearInterval(intervalo);
@@ -107,12 +122,14 @@ function comienzo(){
         };
     }
 
+
     document.addEventListener("keydown",moverbarra);
     document.addEventListener("keyup",pararbarra);
     
 
 }
 
+//Funcion de la creacion del mapa le paso el nivel para que cree barras nivel extra dificultad=-1
 function creacionMapa(dificultad){
     let insertar=document.getElementById("niveles")
     let bloques_nivel=[]
@@ -151,7 +168,6 @@ let extra=dificultad<0;
                 bloque.style.marginLeft=(Math.ceil(bloque.getBoundingClientRect().width)*j)+"px";
                 bloques_nivel.push(bloque);    
             }
-                //MarginTop tiene en cuenta el margen del marco y el tamaño de este intenta estar en el 4% del margen del borde superior del marco
                 
             }
             bloques.push(bloques_nivel);
@@ -167,7 +183,7 @@ let extra=dificultad<0;
             bloque.className="bloque";
             nivel.appendChild(bloque);        
             insertar.appendChild(nivel);
-            //MarginTop tiene en cuenta el margen del marco y el tamaño de este intenta estar en el 4% del margen del borde superior del marco
+            //MarginTop tiene en cuenta el margen del marco y el tamaño de este intenta estar en el 3% del margen del borde superior del marco
             bloque.style.marginTop=((Math.ceil(bloque.getBoundingClientRect().height*i)+marco.getBoundingClientRect().y+marco.getBoundingClientRect().height*0.03)+"px");
             bloque.style.marginLeft=(Math.ceil(bloque.getBoundingClientRect().width)*j)+"px";
             bloques_nivel.push(bloque);
@@ -180,6 +196,8 @@ let extra=dificultad<0;
     
 }
 
+
+//movimiento de la bola
 function animajuego(){
     intervalopelota=setInterval(()=>{
         posY+=velocidadY;
@@ -189,8 +207,9 @@ function animajuego(){
         
         let bola=miBola.getBoundingClientRect();
         
-        choquebloque(bola);
         
+        choquebloque(bola);
+        //Devulve true si toca el borde inferior
         if(choquemarco(bola)){
             final(false);
         }
@@ -201,6 +220,7 @@ function animajuego(){
 }
 
 
+
 function choquebloque(bola){
     let borrado=false;
     let niveles=document.getElementById("niveles");
@@ -208,8 +228,8 @@ function choquebloque(bola){
             let nivel=document.getElementById("nivel"+i);
             for(let j=0;j<bloques[i].length;j++){   
                 let bloque=bloques[i][j].getBoundingClientRect();
-                if (bola.bottom >= bloque.top && bola.top <= bloque.bottom 
-                 && bola.right  >= bloque.left && bola.left <= bloque.right) { 
+                if (bola.bottom+1 >= bloque.top && bola.top-1 <= bloque.bottom 
+                 && bola.right+1  >= bloque.left && bola.left-1 <= bloque.right) { 
                     let arriba = Math.abs(bola.bottom - bloque.top);
                     let horizontalizq = Math.abs(bola.right - bloque.left);
                     let horizontalder = Math.abs(bola.left - bloque.right);
@@ -224,13 +244,7 @@ function choquebloque(bola){
                     }
                     {if(!borrado)
                         if (colision==arriba ||colision==abajo ) {
-                            if(horizontalder<velocidadX ||horizontalizq<velocidadX){
-                               velocidadX*=-1;
-                               if((arriba<1 && velocidadY>0)||(abajo<1 &&velocidadY<0))
-                                velocidadY*=-1;
-                            }
-                            else
-                                velocidadY *= -1;
+                            velocidadY *= -1;
                             
                         } else {
                             velocidadX *= -1;
@@ -243,17 +257,18 @@ function choquebloque(bola){
 }
 
 
+//Funcion que controla el choque de la barra devuelve true si ocurre lo que detiene la barra
 function choquebarra(bola,opcion){
     let tocar=false;
     let barra=miBarra.getBoundingClientRect();
     if (bola.bottom+Math.abs(velocidadY) > barra.top && bola.top-Math.abs(velocidadY) < barra.bottom 
     && bola.right+Math.abs(velocidadX )> barra.left && bola.left-Math.abs(velocidadX) < barra.right) { 
-        let vertical = Math.abs(bola.bottom - barra.top);
-        let abajo= Math.abs(bola.y-barra.bottom);
-        let horizontalizq = Math.abs(bola.right - barra.left);
-        let horizontalder = Math.abs(bola.left - barra.right);
         tocar=true;
         if(opcion==null){
+            let vertical = Math.abs(bola.bottom - barra.top);
+            let abajo= Math.abs(bola.y-barra.bottom);
+            let horizontalizq = Math.abs(bola.right - barra.left);
+            let horizontalder = Math.abs(bola.left - barra.right);
             if (Math.min(vertical, horizontalder, horizontalizq,abajo)==vertical &&velocidadY>0) {
                 velocidadY *= -1;
             } else {
@@ -265,6 +280,7 @@ function choquebarra(bola,opcion){
     return tocar;
 }
 
+//Rebota la bola en lso bordes devuelve true si toca el borde inferior
 function choquemarco(bola){
     let perdiste=false;
         if(bola.y<marco.getBoundingClientRect().y){
@@ -282,6 +298,7 @@ function choquemarco(bola){
 }
 
 
+//Reinicia el juego y dependiendo del resultado avanza de nivel, pierde una vida o muestra el mensaje de perdido
 function final(resultado){
     clearInterval(intervalo);
     clearInterval(intervalopelota);
@@ -323,6 +340,7 @@ function final(resultado){
     }
 }
 
+//Funcion que Reinicia el juego
 function reinicio(opcion){
     if(opcion==1||abierto){
         abierto=false
@@ -357,6 +375,7 @@ function reinicio(opcion){
 }
 
 
+//Activa el nivel extra
 function nivelesEx(){    
     reinicio(2);
 }
